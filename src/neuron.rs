@@ -1,20 +1,28 @@
 use crate::engine::Value;
 
+#[derive(Debug, Clone, Copy)]
+pub enum Activation{
+    Tanh,
+    Sigmoid,
+    Linear,
+}
+
 #[derive(Debug)]
 pub struct Neuron {
     w: Vec<Value>,
     b: Value,
+    act: Activation
 }
 
 impl Neuron {
-    pub fn new(n_inputs: usize) -> Neuron {
+    pub fn new(n_inputs: usize,activation:Activation) -> Neuron {
         let mut w = Vec::new();
         for _ in 0..n_inputs {
             w.push(Value::new(rand::random_range(-1.0..1.0)));
         }
 
         let b = Value::new(rand::random_range(-1.0..1.0));
-        Neuron { w: w, b: b }
+        Neuron { w: w, b: b, act:activation}
     }
     pub fn forward(&self, x: &[Value]) -> Value {
         assert_eq!(x.len(), self.w.len());
@@ -23,7 +31,17 @@ impl Neuron {
             sum += weight.clone() * input.clone();
         }
         sum += self.b.clone();
-        return sum.tanh();
+        match self.act {
+            Activation::Linear => {
+                return sum;
+            }
+            Activation::Sigmoid=>{
+                return sum.sigmoid();
+            }
+            Activation::Tanh=>{
+                return sum.tanh();
+            }
+        }
     }
     pub fn parameters(&self) -> Vec<Value> {
         let mut param = self.w.clone();
@@ -37,10 +55,10 @@ pub struct Layer {
 }
 
 impl Layer {
-    pub fn new(n_inputs: usize, n_outputs: usize) -> Layer {
+    pub fn new(n_inputs: usize, n_outputs: usize,activation:Activation) -> Layer {
         let mut neurons = Vec::new();
         for _ in 0..n_outputs {
-            neurons.push(Neuron::new(n_inputs));
+            neurons.push(Neuron::new(n_inputs,activation));
         }
         Layer { neurons }
     }
@@ -64,17 +82,23 @@ impl Layer {
 
 pub struct MLP {
     layers: Vec<Layer>,
+    hidden_act:Activation,
+    output_act:Activation,
 }
 
 impl MLP {
-    pub fn new(n_inputs: usize, sizes: &[usize]) -> MLP {
+    pub fn new(n_inputs: usize, sizes: &[usize],hidden_act:Activation,output_act:Activation) -> MLP {
         let mut prev = n_inputs;
         let mut layers = Vec::new();
-        for size in sizes {
-            layers.push(Layer::new(prev, *size));
+        for (i,size) in sizes.iter().enumerate() {
+            if i==sizes.len()-1{layers.push(Layer::new(prev, *size,output_act));
+            }
+            else {
+                layers.push(Layer::new(prev, *size,hidden_act));
+            }
             prev = *size;
         }
-        return MLP { layers };
+        return MLP { layers ,hidden_act,output_act};
     }
 
     pub fn forward(&self, x: &[Value]) -> Vec<Value> {
