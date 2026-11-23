@@ -14,6 +14,8 @@ enum Op {
     Sub,
     Mul,
     Tanh,
+    Sigmoid,
+    Log,
 }
 
 #[derive(Debug)]
@@ -47,6 +49,26 @@ impl Value {
             op: Op::Tanh,
         })));
     }
+    pub fn sigmoid(&self) -> Value{
+        let data = 1.0/((-self.0.borrow().data).exp()+1.0);
+        let children = vec![self.clone()];
+        return Value(Rc::new(RefCell::new(ValueData {
+            data: data,
+            grad: 0.0,
+            children: children,
+            op: Op::Sigmoid,
+        })));
+    }
+    pub fn log(&self) -> Value{
+        let data = self.0.borrow().data.ln();
+        let children = vec![self.clone()];
+        return Value(Rc::new(RefCell::new(ValueData {
+            data: data,
+            grad: 0.0,
+            children: children,
+            op: Op::Log,
+        })));
+    }
     fn local_backward(&self) {
         let data = self.0.borrow().data;
         let children = self.0.borrow().children.clone();
@@ -71,6 +93,13 @@ impl Value {
             }
             Op::Tanh => {
                 children[0].0.borrow_mut().grad += (1.0 - (data.powi(2))) * grad;
+            }
+            Op::Sigmoid =>{
+                children[0].0.borrow_mut().grad +=data*(1.0-data)*grad;
+            }
+            Op::Log =>{
+                let x=children[0].0.borrow().data;
+                children[0].0.borrow_mut().grad +=(1.0/x)*grad;
             }
         };
     }
