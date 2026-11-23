@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::ops::Add;
+use std::ops::Sub;
 use std::ops::AddAssign;
+use std::ops::SubAssign;
 use std::ops::Mul;
 use std::rc::Rc;
 
@@ -9,6 +11,7 @@ use std::rc::Rc;
 enum Op {
     Leaf,
     Add,
+    Sub,
     Mul,
     Tanh,
 }
@@ -56,6 +59,10 @@ impl Value {
                     child.0.borrow_mut().grad += grad;
                 }
             }
+            Op::Sub =>{
+                children[0].0.borrow_mut().grad += grad;
+                children[1].0.borrow_mut().grad -= grad;
+            }
             Op::Mul => {
                 let child_zero_data = children[0].0.borrow().data;
                 let child_one_data = children[1].0.borrow().data;
@@ -82,6 +89,12 @@ impl Value {
     pub fn data(&self) -> f64 {
         return self.0.borrow().data;
     }
+    pub fn set_grad(&self, g: f64){
+        self.0.borrow_mut().grad=g;
+    }
+    pub fn set_data(&self,d:f64){
+        self.0.borrow_mut().data=d;
+    }
 }
 
 impl Add for Value {
@@ -94,6 +107,19 @@ impl Add for Value {
             grad: 0.0,
             children: children,
             op: Op::Add,
+        })))
+    }
+}
+impl Sub for Value {
+    type Output = Value;
+    fn sub(self, other: Value) -> Value {
+        let data = self.0.borrow().data - other.0.borrow().data;
+        let children = vec![self, other];
+        Value(Rc::new(RefCell::new(ValueData {
+            data: data,
+            grad: 0.0,
+            children: children,
+            op: Op::Sub,
         })))
     }
 }
@@ -114,6 +140,11 @@ impl Mul for Value {
 impl AddAssign for Value {
     fn add_assign(&mut self, other: Value) {
         *self = self.clone() + other;
+    }
+}
+impl SubAssign for Value {
+    fn sub_assign(&mut self, other: Value) {
+        *self = self.clone() - other;
     }
 }
 fn build_topo(
