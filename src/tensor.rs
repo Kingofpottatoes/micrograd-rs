@@ -39,11 +39,13 @@ impl Tensor{
         }
     }
     pub fn get(&self,i:usize,j:usize)->f32{
-        assert!(i*j<self.data.len());
+        assert!(i<self.rows);
+        assert!(j<self.columns);
         return self.data[i*self.columns +j]
     }
     pub fn set(&mut self,i:usize,j:usize,value:f32){
-        assert!(i*j<self.data.len());
+        assert!(i<self.rows);
+        assert!(j<self.columns);
         self.data[i*self.columns +j]=value
     }
     pub fn matmul(&self,other:&Tensor)->Tensor{
@@ -62,6 +64,41 @@ impl Tensor{
             data:data, 
             rows: self.rows, 
             columns: other.columns,
+        }
+    }
+    pub fn transpose(&self)->Tensor{
+        let mut trans=Tensor::zero(self.columns,self.rows);
+        for i in 0..self.rows{
+            for j in 0..self.columns{
+                trans.set(j,i,self.get(i,j));
+            }
+        }
+        return trans;
+    }
+    pub fn add_row(&self,row:&Tensor)->Tensor{
+        assert_eq!(row.rows,1);
+        assert_eq!(row.columns,self.columns);
+        let mut data=Vec::new();
+        for i in 0..self.rows{
+            for j in 0..self.columns{
+                data.push(self.data[i*self.columns+j]+row.data[j]);
+            }
+        }
+        Tensor {
+            data:data, 
+            rows: self.rows, 
+            columns: self.columns
+        }
+    }
+    pub fn map(&self,f: impl Fn(f32) -> f32)->Tensor{
+        let mut data=Vec::new();
+        for value in self.data.iter(){
+            data.push(f(*value));
+        }
+        Tensor {
+            data:data, 
+            rows: self.rows, 
+            columns: self.columns 
         }
     }
 }
