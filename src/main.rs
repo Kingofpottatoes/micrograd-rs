@@ -2,6 +2,7 @@ mod neuron;
 use neuron::{MLP,Layer, Neuron,Activation};
 mod engine;
 use engine::Value;
+mod tensor;
 const EPS: f64 = 1e-7;
 
 fn main() {
