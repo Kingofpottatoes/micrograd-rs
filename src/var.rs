@@ -55,6 +55,13 @@ impl Var {
         let data=Tensor::fill(1,1,self.data().sum());
         return Var::from_op(data, vec![self.clone()], TOp::Sum);
     }
+    pub fn sigmoid(&self)->Var{
+         return Var::from_op(self.data().map(|x| 1.0/(1.0+((-x).exp()))), vec![self.clone()], TOp::Sigmoid);
+    }
+    pub fn add_row(&self,bias:&Var)->Var{
+        let data=self.data().add_row(&bias.data());
+        return Var::from_op(data, vec![self.clone(),bias.clone()],TOp::AddRow);
+    }
     fn accumulate_grad(&self,g:&Tensor){
         let mut d=self.0.borrow_mut();
         d.grad=d.grad.add(g);
