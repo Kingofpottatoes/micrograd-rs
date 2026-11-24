@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::ops::Add;
-use std::ops::Sub;
 use std::ops::AddAssign;
-use std::ops::SubAssign;
 use std::ops::Mul;
+use std::ops::Sub;
+use std::ops::SubAssign;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Copy)]
@@ -49,8 +49,8 @@ impl Value {
             op: Op::Tanh,
         })));
     }
-    pub fn sigmoid(&self) -> Value{
-        let data = 1.0/((-self.0.borrow().data).exp()+1.0);
+    pub fn sigmoid(&self) -> Value {
+        let data = 1.0 / ((-self.0.borrow().data).exp() + 1.0);
         let children = vec![self.clone()];
         return Value(Rc::new(RefCell::new(ValueData {
             data: data,
@@ -59,7 +59,7 @@ impl Value {
             op: Op::Sigmoid,
         })));
     }
-    pub fn log(&self) -> Value{
+    pub fn log(&self) -> Value {
         let data = self.0.borrow().data.ln();
         let children = vec![self.clone()];
         return Value(Rc::new(RefCell::new(ValueData {
@@ -81,7 +81,7 @@ impl Value {
                     child.0.borrow_mut().grad += grad;
                 }
             }
-            Op::Sub =>{
+            Op::Sub => {
                 children[0].0.borrow_mut().grad += grad;
                 children[1].0.borrow_mut().grad -= grad;
             }
@@ -94,12 +94,12 @@ impl Value {
             Op::Tanh => {
                 children[0].0.borrow_mut().grad += (1.0 - (data.powi(2))) * grad;
             }
-            Op::Sigmoid =>{
-                children[0].0.borrow_mut().grad +=data*(1.0-data)*grad;
+            Op::Sigmoid => {
+                children[0].0.borrow_mut().grad += data * (1.0 - data) * grad;
             }
-            Op::Log =>{
-                let x=children[0].0.borrow().data;
-                children[0].0.borrow_mut().grad +=(1.0/x)*grad;
+            Op::Log => {
+                let x = children[0].0.borrow().data;
+                children[0].0.borrow_mut().grad += (1.0 / x) * grad;
             }
         };
     }
@@ -118,11 +118,11 @@ impl Value {
     pub fn data(&self) -> f64 {
         return self.0.borrow().data;
     }
-    pub fn set_grad(&self, g: f64){
-        self.0.borrow_mut().grad=g;
+    pub fn set_grad(&self, g: f64) {
+        self.0.borrow_mut().grad = g;
     }
-    pub fn set_data(&self,d:f64){
-        self.0.borrow_mut().data=d;
+    pub fn set_data(&self, d: f64) {
+        self.0.borrow_mut().data = d;
     }
 }
 
