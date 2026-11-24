@@ -25,7 +25,7 @@ impl Tensor {
             columns: cols,
         }
     }
-    pub fn identity(size:usize){
+    pub fn identity(size:usize)->Tensor{
         let mut identity_vec=Vec::new();
         for i in 0..size{
             for j in 0..size{
@@ -37,6 +37,7 @@ impl Tensor {
                 }
             }
         }
+        return Tensor::from_vec(identity_vec, size, size);
     }
     pub fn rand(rows: usize, cols: usize) -> Tensor {
         let mut data = Vec::new();
