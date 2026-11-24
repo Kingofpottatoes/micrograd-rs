@@ -1,9 +1,9 @@
 use rand::RngExt;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 
-
-
-
+#[derive(Debug, Clone)]
 pub struct Tensor {
     data:Vec<f32>,
     rows:usize,
@@ -11,9 +11,9 @@ pub struct Tensor {
 }
 
 impl Tensor{
-    pub fn zero(rows:usize,cols:usize)->Tensor{
+    pub fn fill(rows:usize,cols:usize,value:f32)->Tensor{
         Tensor{
-            data:vec![0.0;rows*cols],
+            data:vec![value;rows*cols],
             rows:rows,
             columns:cols,
         }
@@ -48,6 +48,12 @@ impl Tensor{
         assert!(j<self.columns);
         self.data[i*self.columns +j]=value
     }
+    pub fn rows(&self)->usize{
+        return self.rows;
+    }
+    pub fn cols(&self)->usize{
+        return self.columns;
+    }
     pub fn matmul(&self,other:&Tensor)->Tensor{
         assert_eq!(self.columns,other.rows);
         let mut data=Vec::new();
@@ -67,7 +73,7 @@ impl Tensor{
         }
     }
     pub fn transpose(&self)->Tensor{
-        let mut trans=Tensor::zero(self.columns,self.rows);
+        let mut trans=Tensor::fill(self.columns,self.rows,0.0);
         for i in 0..self.rows{
             for j in 0..self.columns{
                 trans.set(j,i,self.get(i,j));
@@ -90,6 +96,19 @@ impl Tensor{
             columns: self.columns
         }
     }
+    pub fn sum_rows(&self)->Tensor{
+        let mut data=vec![0.0; self.columns];
+        for i in 0..self.rows{
+            for j in 0..self.columns{
+                data[j]+=self.data[i*self.columns+j];
+            }
+        }
+        Tensor {
+            data:data,
+            rows:1, 
+            columns:self.columns
+        }
+    }
     pub fn map(&self,f: impl Fn(f32) -> f32)->Tensor{
         let mut data=Vec::new();
         for value in self.data.iter(){
@@ -99,6 +118,56 @@ impl Tensor{
             data:data, 
             rows: self.rows, 
             columns: self.columns 
+        }
+    }
+    pub fn add(&self,other:&Tensor)->Tensor{
+        let mut data=Vec::new();
+        assert_eq!(self.rows,other.rows);
+        assert_eq!(self.columns,other.columns);
+        for i in 0..self.rows{
+            for j in 0..self.columns{
+                data.push(self.data[i*self.columns + j]+other.data[i*other.columns+j]);
+            }
+        }
+        Tensor{
+            data:data,
+            rows:self.rows,
+            columns:self.columns,
+        }
+    }
+    pub fn sum(&self)->f32{
+        let mut sum=0.0;
+        for value in self.data.iter(){
+            sum+=value;
+        }
+        return sum;
+    }
+    pub fn mul_elem(&self,other:&Tensor)->Tensor{
+        assert_eq!(self.rows,other.rows);
+        assert_eq!(self.columns,other.columns);
+        let mut data=Vec::new();
+        for i in 0..self.rows{
+            for j in 0..self.columns{
+                data.push(self.data[i*self.columns + j]*other.data[i*other.columns+j]);
+            }
+        }
+        Tensor{
+            data:data,
+            rows:self.rows,
+            columns:self.columns,
+        }
+    }
+    pub fn scale(&self,v:f32)->Tensor{
+        let mut data=Vec::new();
+        for i in 0..self.rows{
+            for j in 0..self.columns{
+                data.push(self.data[i*self.columns+j]*v);
+            }
+        }
+        Tensor {
+            data:data, 
+            rows: self.rows, 
+            columns: self.columns,
         }
     }
 }
