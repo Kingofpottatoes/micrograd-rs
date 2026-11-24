@@ -93,6 +93,17 @@ impl Var {
             }
             
         }
+    }
+    pub fn backward(&self){
+        assert_eq!(self.data().rows(),1);
+        assert_eq!(self.data().cols(),1);
+        let mut visited=HashSet::new();
+        let mut topo=Vec::new();
+        build_topo(self, &mut visited, &mut topo);
+        self.0.borrow_mut().grad=Tensor::fill(1,1,1.0);
+        for var in topo.iter().rev(){
+            var.local_backward();
+        }
 
     }
 }
