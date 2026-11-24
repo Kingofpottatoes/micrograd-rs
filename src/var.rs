@@ -7,6 +7,8 @@ use std::rc::Rc;
 pub enum TOp {
     Leaf,
     Sum,
+    Sub,
+    MulElem,
     MatMul,
     AddRow,
     Tanh,
@@ -63,9 +65,17 @@ impl Var {
             TOp::Sigmoid,
         );
     }
+    pub fn sub(&self,other:&Var)->Var{
+        return Var::from_op(self.data().add(&other.data().scale(-1.0)), vec![self.clone(),other.clone()], TOp::Sub);
+
+    }
     pub fn add_row(&self, bias: &Var) -> Var {
         let data = self.data().add_row(&bias.data());
         return Var::from_op(data, vec![self.clone(), bias.clone()], TOp::AddRow);
+    }
+    pub fn mul_elem(&self, other: &Var) -> Var{
+        let data=self.data().mul_elem(&other.data());
+        return Var::from_op(data, vec![self.clone(), other.clone()], TOp::MulElem);
     }
     fn accumulate_grad(&self, g: &Tensor) {
         let mut d = self.0.borrow_mut();
@@ -86,6 +96,10 @@ impl Var {
                 );
                 children[0].accumulate_grad(&contribution);
             }
+            TOp::Sub => {
+                children[0].accumulate_grad(&grad);
+                children[1].accumulate_grad(&grad.scale(-1.0));
+            }
             TOp::MatMul => {
                 let a = children[0].data().clone();
                 let b = children[1].data().clone();
@@ -93,6 +107,12 @@ impl Var {
                 let db = a.transpose().matmul(&grad);
                 children[0].accumulate_grad(&da);
                 children[1].accumulate_grad(&db);
+            }
+            TOp::MulElem => {
+                let a = children[0].data().clone();
+                let b = children[1].data().clone();
+                children[0].accumulate_grad(&grad.mul_elem(&b));
+                children[1].accumulate_grad(&grad.mul_elem(&a));
             }
             TOp::AddRow => {
                 children[0].accumulate_grad(&grad);
