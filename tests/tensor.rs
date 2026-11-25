@@ -352,3 +352,278 @@ fn matmul_is_associative(){// (A x B) x C = A x (B x C)
     let ax_bxc=a.matmul(&b.matmul(&c));
     assert!(approx_eq(&ax_bxc,&axb_x));
 }
+//--------------
+//--OPERATION---
+//--------------
+
+//add
+#[test]
+fn add_size_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1=Tensor::rand(rows, cols);
+    let r=t0.add(&t1);
+    assert_eq!(r.rows(),t0.rows());
+    assert_eq!(r.cols(),t0.cols());
+}
+#[test]
+fn add_values_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1=Tensor::rand(rows, cols);
+    let r=t0.add(&t1);
+    for i in 0..rows{
+        for j in 0..cols{
+            assert_eq!(r.get(i,j),t0.get(i, j)+t1.get(i,j));
+        }
+    }
+}
+#[test]
+#[should_panic]
+fn add_different_size(){
+    let rows0=rand::random_range(1..10);
+    let cols0=rand::random_range(1..10);
+    let mut rows1=rand::random_range(1..10);
+    let mut cols1=rand::random_range(1..10);
+    while rows0==rows1{
+        rows1=rand::random_range(1..10);
+    }
+    while cols0==cols1{
+        cols1=rand::random_range(1..10);
+    }
+    let t0=Tensor::rand(rows0, cols0);
+    let t1=Tensor::rand(rows1, cols1);
+    let _r=t0.add(&t1);
+}
+#[test]
+fn add_neutral_element(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1=Tensor::fill(rows, cols, 0.0);
+    let r=t0.add(&t1);
+    assert_eq!(t0,r);
+}
+#[test]
+fn add_is_commutative(){
+    //A+B=B+A
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1= Tensor::rand(rows, cols);
+    assert!(approx_eq(&t0.add(&t1),&t1.add(&t0)));
+}
+#[test]
+fn add_is_associative(){
+    //(A+B)+C=A+(B+C)
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let a=Tensor::rand(rows, cols);
+    let b= Tensor::rand(rows, cols);
+    let c= Tensor::rand(rows, cols);
+    let ab_c=(a.add(&b)).add(&c);
+    let a_bc=a.add(&b.add(&c));
+    assert!(approx_eq(&ab_c,&a_bc));
+} 
+#[test]
+fn add_himself_is_scale_by_two(){
+    let rows0=rand::random_range(1..10);
+    let cols0=rand::random_range(1..10);
+    let t=Tensor::rand(rows0, cols0);
+    let r=t.add(&t);
+    let r2=t.scale(2.0);
+    assert_eq!(&r,&r2);
+}
+//mul elem
+#[test]
+fn mul_elem_size_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1=Tensor::rand(rows, cols);
+    let r=t0.mul_elem(&t1);
+    assert_eq!(r.rows(),t0.rows());
+    assert_eq!(r.cols(),t0.cols());
+}
+#[test]
+fn mul_elem_values_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1=Tensor::rand(rows, cols);
+    let r=t0.mul_elem(&t1);
+    for i in 0..rows{
+        for j in 0..cols{
+            assert_eq!(r.get(i,j),t0.get(i, j)*t1.get(i,j));
+        }
+    }
+}
+#[test]
+#[should_panic]
+fn mul_elem_different_size(){
+    let rows0=rand::random_range(1..10);
+    let cols0=rand::random_range(1..10);
+    let mut rows1=rand::random_range(1..10);
+    let mut cols1=rand::random_range(1..10);
+    while rows0==rows1{
+        rows1=rand::random_range(1..10);
+    }
+    while cols0==cols1{
+        cols1=rand::random_range(1..10);
+    }
+    let t0=Tensor::rand(rows0, cols0);
+    let t1=Tensor::rand(rows1, cols1);
+    let _r=t0.mul_elem(&t1);//should panic
+}
+#[test]
+fn mul_elem_neutral_element(){
+    // A * 1 = A
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let one=Tensor::fill(rows, cols, 1.0);
+    assert_eq!(t,t.mul_elem(&one));
+}
+#[test]
+fn mul_elem_absorbing_element(){
+    // A * 0 = 0
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let zero=Tensor::fill(rows, cols, 0.0);
+    assert_eq!(zero,t.mul_elem(&zero));
+}
+#[test]
+fn mul_elem_is_commutative(){
+    //A*B=B*A
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let t1= Tensor::rand(rows, cols);
+    assert_eq!(t0.mul_elem(&t1),t1.mul_elem(&t0));
+}
+#[test]
+fn mul_elem_is_associative(){
+    //(A*B)*C=A*(B*C)
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let a=Tensor::rand(rows, cols);
+    let b= Tensor::rand(rows, cols);
+    let c= Tensor::rand(rows, cols);
+    let ab_c=(a.mul_elem(&b)).mul_elem(&c);
+    let a_bc=a.mul_elem(&b.mul_elem(&c));
+    assert!(approx_eq(&ab_c,&a_bc));
+}
+#[test]
+fn mul_elem_is_distributive(){
+    //(A+B)*C=A*C + B*C
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let a=Tensor::rand(rows, cols);
+    let b= Tensor::rand(rows, cols);
+    let c= Tensor::rand(rows, cols);
+    let ab_c=(a.add(&b)).mul_elem(&c);
+    let ac_bc=(a.mul_elem(&c)).add(&b.mul_elem(&c));
+    assert!(approx_eq(&ab_c,&ac_bc));
+}
+
+//scale
+#[test]
+fn scale_size_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let random_value=rand::random();
+    let t0=Tensor::rand(rows, cols);
+    let r=t0.scale(random_value);
+    assert_eq!(r.rows(),rows);
+    assert_eq!(r.cols(),cols);
+}
+#[test]
+fn scale_elem_values_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let random_value=rand::random();
+    let t0=Tensor::rand(rows, cols);
+    let r=t0.scale(random_value);
+    for i in 0..rows{
+        for j in 0..cols{
+            assert_eq!(r.get(i,j),t0.get(i, j)*random_value);
+        }
+    }
+}
+#[test]
+fn scale_by_one_is_himself(){
+    //A*1=A
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let r=t0.scale(1.0);
+    for i in 0..rows{
+        for j in 0..cols{
+            assert_eq!(r.get(i,j),t0.get(i, j));
+        }
+    }
+}
+#[test]
+fn scale_by_zero_is_zero(){
+    //A*1=A
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t0=Tensor::rand(rows, cols);
+    let r=t0.scale(0.0);
+    let zero=Tensor::fill(rows, cols,0.0);
+    assert_eq!(r,zero);
+}
+#[test]
+fn scale_by_a_then_b_is_scale_by_a_times_b(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let a=rand::random();
+    let b=rand::random();
+    let r0=t.scale(a).scale(b);
+    let r1=t.scale(a*b);
+    assert!(approx_eq(&r0,&r1));
+}
+#[test]
+fn scale_a_by_b_is_a_mul_elem_fill_b(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let b=rand::random();
+    let r=t.scale(b);
+    let r1=t.mul_elem(&Tensor::fill(rows, cols, b));
+    assert_eq!(r,r1);
+}
+#[test]
+fn map_size_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let r=t.map(|x| x);
+    assert_eq!(r.rows(),rows);
+    assert_eq!(r.cols(),cols);
+}
+#[test]
+fn map_chain_rules(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let f=|x:f32| x.tanh();
+    let g=|x:f32| x.sin();
+    let r=t.map(g).map(f);
+    let r2=t.map(|x| f(g(x)));
+    assert_eq!(r,r2);
+}
+#[test]
+fn map_times_a_is_scale_by_a(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let random_value=rand::random();
+    let r=t.scale(random_value);
+    let r1=t.map(|x| x*random_value);
+    assert_eq!(r,r1);
+}
