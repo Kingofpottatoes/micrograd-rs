@@ -7,12 +7,17 @@ use std::rc::Rc;
 pub enum TOp {
     Leaf,
     Sum,
+    Add,
     Sub,
+    Scale(f32),
+    Log,
     MulElem,
     MatMul,
     AddRow,
     Tanh,
     Sigmoid,
+    ReLu,
+    Mean,
 }
 
 pub struct VarData {
@@ -58,6 +63,20 @@ impl Var {
         let data = Tensor::fill(1, 1, self.data().sum());
         return Var::from_op(data, vec![self.clone()], TOp::Sum);
     }
+    pub fn add(&self, other: &Var) -> Var {
+        return Var::from_op(
+            self.data().add(&other.data()),
+            vec![self.clone(), other.clone()],
+            TOp::Add,
+        );
+    }
+    pub fn scale(&self, scale: f32) -> Var {
+        return Var::from_op(
+            self.data().scale(scale),
+            vec![self.clone()],
+            TOp::Scale(scale),
+        );
+    }
     pub fn sigmoid(&self) -> Var {
         return Var::from_op(
             self.data().map(|x| 1.0 / (1.0 + ((-x).exp()))),
@@ -65,17 +84,41 @@ impl Var {
             TOp::Sigmoid,
         );
     }
-    pub fn sub(&self,other:&Var)->Var{
-        return Var::from_op(self.data().add(&other.data().scale(-1.0)), vec![self.clone(),other.clone()], TOp::Sub);
-
+    pub fn sub(&self, other: &Var) -> Var {
+        return Var::from_op(
+            self.data().add(&other.data().scale(-1.0)),
+            vec![self.clone(), other.clone()],
+            TOp::Sub,
+        );
     }
     pub fn add_row(&self, bias: &Var) -> Var {
         let data = self.data().add_row(&bias.data());
         return Var::from_op(data, vec![self.clone(), bias.clone()], TOp::AddRow);
     }
-    pub fn mul_elem(&self, other: &Var) -> Var{
-        let data=self.data().mul_elem(&other.data());
+    pub fn mul_elem(&self, other: &Var) -> Var {
+        let data = self.data().mul_elem(&other.data());
         return Var::from_op(data, vec![self.clone(), other.clone()], TOp::MulElem);
+    }
+    pub fn relu(&self) -> Var {
+        return Var::from_op(
+            self.data().map(|x| x.max(0.0)),
+            vec![self.clone()],
+            TOp::ReLu,
+        );
+    }
+    pub fn log(&self) -> Var {
+        return Var::from_op(self.data().map(|x| x.ln()), vec![self.clone()], TOp::Log);
+    }
+    pub fn mean(&self) -> Var {
+        return Var::from_op(
+            Tensor::fill(
+                1,
+                1,
+                self.data().sum() / (self.data().rows() as f32 * self.data().cols() as f32),
+            ),
+            vec![self.clone()],
+            TOp::Mean,
+        );
     }
     fn accumulate_grad(&self, g: &Tensor) {
         let mut d = self.0.borrow_mut();
@@ -96,9 +139,16 @@ impl Var {
                 );
                 children[0].accumulate_grad(&contribution);
             }
+            TOp::Add => {
+                children[0].accumulate_grad(&grad);
+                children[1].accumulate_grad(&grad);
+            }
             TOp::Sub => {
                 children[0].accumulate_grad(&grad);
                 children[1].accumulate_grad(&grad.scale(-1.0));
+            }
+            TOp::Scale(scale) => {
+                children[0].accumulate_grad(&grad.scale(scale));
             }
             TOp::MatMul => {
                 let a = children[0].data().clone();
@@ -124,6 +174,25 @@ impl Var {
             }
             TOp::Sigmoid => {
                 let contribution = grad.mul_elem(&data.map(|y| y * (1.0 - y)));
+                children[0].accumulate_grad(&contribution);
+            }
+            TOp::ReLu => {
+                let contribution = data
+                    .map(|x| if x > 0.0 { return 1.0 } else { return 0.0 })
+                    .mul_elem(&grad);
+                children[0].accumulate_grad(&contribution);
+            }
+            TOp::Log => {
+                let contribution = grad.mul_elem(&children[0].data().map(|x| x.powi(-1)));
+                children[0].accumulate_grad(&contribution);
+            }
+            TOp::Mean => {
+                let n = (children[0].data().rows() * children[0].data().cols()) as f32;
+                let contribution = Tensor::fill(
+                    children[0].data().rows(),
+                    children[0].data().cols(),
+                    grad.scale(1.0 / n).get(0, 0),
+                );
                 children[0].accumulate_grad(&contribution);
             }
         }

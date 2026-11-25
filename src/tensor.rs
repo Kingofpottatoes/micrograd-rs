@@ -2,7 +2,7 @@ use rand::RngExt;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Tensor {
     data: Vec<f32>,
     rows: usize,
@@ -25,14 +25,13 @@ impl Tensor {
             columns: cols,
         }
     }
-    pub fn identity(size:usize)->Tensor{
-        let mut identity_vec=Vec::new();
-        for i in 0..size{
-            for j in 0..size{
-                if i==j{
+    pub fn identity(size: usize) -> Tensor {
+        let mut identity_vec = Vec::new();
+        for i in 0..size {
+            for j in 0..size {
+                if i == j {
                     identity_vec.push(1.0);
-                }
-                else{
+                } else {
                     identity_vec.push(0.0);
                 }
             }
@@ -53,16 +52,16 @@ impl Tensor {
     }
     pub fn get(&self, i: usize, j: usize) -> f32 {
         assert!(i < self.rows, "row index out of bounds");
-        assert!(j < self.columns, "column index out of bounds");    
+        assert!(j < self.columns, "column index out of bounds");
         return self.data[i * self.columns + j];
     }
     pub fn set(&mut self, i: usize, j: usize, value: f32) {
         assert!(i < self.rows, "row index out of bounds");
-        assert!(j < self.columns, "column index out of bounds");        
+        assert!(j < self.columns, "column index out of bounds");
         self.data[i * self.columns + j] = value
     }
     pub fn data(&self) -> &[f32] {
-        return &self.data
+        return &self.data;
     }
     pub fn rows(&self) -> usize {
         return self.rows;
