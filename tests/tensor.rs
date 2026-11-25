@@ -627,3 +627,95 @@ fn map_times_a_is_scale_by_a(){
     let r1=t.map(|x| x*random_value);
     assert_eq!(r,r1);
 }
+//---------------
+//------SUM------
+//---------------
+#[test]
+fn sum_units_test(){
+    let t = Tensor::from_vec(vec![1.0, 2.0, 3.0, 4.0], 2, 2);
+    assert_eq!(t.sum(), 10.0);
+    let t = Tensor::from_vec(vec![0.5, -1.5, 2.0, 1.5, 2.5, -2.0], 2, 3);
+    assert_eq!(t.sum(), 3.0);
+}
+#[test]
+fn sum_value_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let r=t.sum();
+    let sum:f32=t.data().iter().sum();
+    assert_eq!(sum,r);
+}
+#[test]
+fn sum_row_size_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let row=t.sum_rows();
+    assert_eq!(row.rows(),1);
+}
+#[test]
+fn sum_of_sum_row_is_sum_of_t(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let row=t.sum_rows();
+    assert!((t.sum() - row.sum()).abs() < 1e-4)
+}
+#[test]
+fn sum_rows_hand_computed_values(){
+    let t = Tensor::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 3, 2);
+    assert_eq!(t.sum_rows(), Tensor::from_vec(vec![9.0, 12.0], 1, 2));
+    let t = Tensor::from_vec(vec![1.0, -2.0, 3.0], 1, 3);
+    assert_eq!(t.sum_rows(), Tensor::from_vec(vec![1.0, -2.0, 3.0], 1, 3));
+    let t = Tensor::from_vec(vec![1.0, 2.0, 3.0, 4.0], 4, 1);
+    assert_eq!(t.sum_rows(), Tensor::from_vec(vec![10.0], 1, 1));
+    let t = Tensor::from_vec(vec![0.5, -1.5, 2.0, 1.5, 2.5, -2.0], 2, 3);
+    assert_eq!(t.sum_rows(), Tensor::from_vec(vec![2.0, 1.0, 0.0], 1, 3));
+}
+//---------------
+//----ADD-ROW----
+//---------------
+#[test]
+fn add_row_size_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let row=Tensor::rand(1, cols);
+    let r=t.add_row(&row);
+    assert_eq!(t.rows(),r.rows());
+}
+#[test]
+#[should_panic]
+fn add_row_to_many_lines(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let row=Tensor::rand(rand::random_range(2..10), cols);
+    let _r=t.add_row(&row);//should panic
+}
+#[test]
+#[should_panic]
+fn add_row_to_many_cols(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let row=Tensor::rand(1, cols+1);
+    let _r=t.add_row(&row);//should panic
+}
+#[test]
+fn add_row_value_check(){
+    let rows=rand::random_range(1..10);
+    let cols=rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let row=Tensor::rand(1, cols);
+    let r=t.add_row(&row);
+    for i in 0..rows{
+        for j in 0..cols{
+            assert_eq!(t.get(i,j)+row.get(0,j),r.get(i,j));
+        }
+    }
+}
+//---------------
+//--TRANSVERSAL--
+//---------------
