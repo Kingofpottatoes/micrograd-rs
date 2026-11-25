@@ -46,3 +46,112 @@ fn tanh_grad(){
     let error=check_grad(|v| v.tanh().mul_elem(&w).sum(), &t);
     assert!(error < 1e-2, "max error: {}", error);
 }
+
+#[test]
+fn sigmoid_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|v| v.sigmoid().mul_elem(&w).sum(), &t);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn sum_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let error=check_grad(|v| v.sum(), &t);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn matmul_first_entry_grad(){
+    let rows = rand::random_range(1..10);
+    let common_size = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let a = Tensor::rand(rows, common_size);
+    let b=Var::new(Tensor::rand(common_size, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|v| v.matmul(&b).mul_elem(&w).sum(), &a);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn matmul_second_entry_grad(){
+    let rows = rand::random_range(1..10);
+    let common_size = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let b = Tensor::rand(common_size, cols);
+    let a=Var::new(Tensor::rand(rows, common_size));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|b| a.matmul(b).mul_elem(&w).sum(), &b);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn add_row_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let x=Tensor::rand(rows, cols);
+    let bias=Var::new(Tensor::rand(1, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|v| v.add_row(&bias).mul_elem(&w).sum(),&x);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn add_row_bias_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let x=Tensor::rand(1, cols);
+    let x_cap=Var::new(Tensor::rand(rows, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|b| x_cap.add_row(b).mul_elem(&w).sum(),&x);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn sub_first_entry_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let b=Var::new(Tensor::rand(rows, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|a| a.sub(&b).mul_elem(&w).sum(),&t);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn sub_second_entry_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let a=Var::new(Tensor::rand(rows, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|b| a.sub(b).mul_elem(&w).sum(),&t);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn mul_elem_first_entry_grad(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let b=Var::new(Tensor::rand(rows, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|a| a.mul_elem(&b).mul_elem(&w).sum(),&t);
+    assert!(error < 1e-2, "max error: {}", error);
+}
+
+#[test]
+fn mul_elem_second_entry(){
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t=Tensor::rand(rows, cols);
+    let a=Var::new(Tensor::rand(rows, cols));
+    let w=Var::new(Tensor::rand(rows, cols));
+    let error=check_grad(|b| a.mul_elem(b).mul_elem(&w).sum(),&t);
+    assert!(error < 1e-2, "max error: {}", error);
+}
