@@ -1,5 +1,5 @@
 use micrograd_rs::tensor::Tensor;
-use micrograd_rs::var::Var;
+use micrograd_rs::autograd::Var;
 
 fn get_biggest_difference(a: Tensor, b: Tensor) -> f32 {
     assert_eq!(a.rows(), b.rows());

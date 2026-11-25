@@ -1,4 +1,3 @@
-pub mod engine;
-pub mod neuron;
+pub mod scalar;
 pub mod tensor;
-pub mod var;
+pub mod autograd;
