@@ -99,9 +99,7 @@ impl MLP {
             }
             prev = *size;
         }
-        MLP {
-            layers,
-        }
+        MLP { layers }
     }
 
     pub fn forward(&self, x: &[Value]) -> Vec<Value> {
