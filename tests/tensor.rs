@@ -818,3 +818,69 @@ fn add_row_value_check() {
         }
     }
 }
+
+#[test]
+fn softmax_rows_size_check() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let r = t.softmax_rows();
+    assert_eq!(r.rows(), t.rows());
+    assert_eq!(r.cols(), t.cols());
+}
+
+#[test]
+fn softmax_rows_sum_to_one() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let r = t.softmax_rows();
+    for i in 0..rows {
+        let mut sum = 0.0;
+        for j in 0..cols {
+            sum += r.get(i, j);
+        }
+        assert!((sum - 1.0).abs() < 1e-5);
+    }
+}
+
+#[test]
+fn softmax_rows_value_are_between_zero_and_ones() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let r = t.softmax_rows();
+    for i in 0..rows {
+        for j in 0..cols {
+            assert!(r.get(i, j) >= 0.0 && r.get(i, j) <= 1.0);
+        }
+    }
+}
+
+#[test]
+fn softmax_rows_adding_bias_does_not_change_result() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let r = t.softmax_rows();
+    let r2 = t.map(|v| v + 5.0).softmax_rows();
+    assert!(approx_eq(&r, &r2))
+}
+
+#[test]
+fn softmax_rows_units_tests() {
+    let t = Tensor::from_vec(vec![0.0, std::f32::consts::LN_2, 0.0, 0.0, 0.0, 0.0], 2, 3);
+    let expected = Tensor::from_vec(vec![0.25, 0.5, 0.25, 1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0], 2, 3);
+    assert!(approx_eq(&t.softmax_rows(), &expected));
+}
+
+#[test]
+fn softmax_rows_is_stable_with_extreme_values() {
+    let t = Tensor::from_vec(vec![1000.0, 1000.0], 1, 2);
+    let expected = Tensor::from_vec(vec![0.5, 0.5], 1, 2);
+    assert!(approx_eq(&t.softmax_rows(), &expected));
+
+    let t = Tensor::from_vec(vec![-1000.0, -1001.0], 1, 2);
+    let expected = Tensor::from_vec(vec![0.731_059, 0.268_941], 1, 2);
+    assert!(approx_eq(&t.softmax_rows(), &expected));
+}
