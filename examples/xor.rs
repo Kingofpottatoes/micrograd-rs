@@ -18,10 +18,9 @@ fn main() {
         Box::new(Linear::new(4, 1)),
         Box::new(Sigmoid),
     ]);
-
+    let params=model.parameters();
     //training loop
     for i in 0..n_step {
-        let params=model.parameters();
         let output = model.forward(&xor);
         let loss = mse_loss(&output, &target);
         //reset grad
