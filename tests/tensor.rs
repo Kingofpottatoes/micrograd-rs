@@ -538,6 +538,98 @@ fn mul_elem_is_distributive() {
     let ac_bc = (a.mul_elem(&c)).add(&b.mul_elem(&c));
     assert!(approx_eq(&ab_c, &ac_bc));
 }
+//div_elem
+#[test]
+fn div_elem_size_check() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t0 = Tensor::rand(rows, cols);
+    let t1 = Tensor::rand(rows, cols);
+    let r = t0.div_elem(&t1);
+    assert_eq!(r.rows(), t0.rows());
+    assert_eq!(r.cols(), t0.cols());
+}
+#[test]
+fn div_elem_values_check() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t0 = Tensor::rand(rows, cols);
+    let t1 = Tensor::rand(rows, cols);
+    let r = t0.div_elem(&t1);
+    for i in 0..rows {
+        for j in 0..cols {
+            assert_eq!(r.get(i, j), t0.get(i, j) / t1.get(i, j));
+        }
+    }
+}
+#[test]
+#[should_panic]
+fn div_elem_different_size() {
+    let rows0 = rand::random_range(1..10);
+    let cols0 = rand::random_range(1..10);
+    let mut rows1 = rand::random_range(1..10);
+    let mut cols1 = rand::random_range(1..10);
+    while rows0 == rows1 {
+        rows1 = rand::random_range(1..10);
+    }
+    while cols0 == cols1 {
+        cols1 = rand::random_range(1..10);
+    }
+    let t0 = Tensor::rand(rows0, cols0);
+    let t1 = Tensor::rand(rows1, cols1);
+    let _r = t0.div_elem(&t1); //should panic
+}
+
+#[test]
+fn div_elem_neutral_element() {
+    // A / 1 = A
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let one = Tensor::fill(rows, cols, 1.0);
+    assert_eq!(t, t.div_elem(&one));
+}
+#[test]
+fn div_elem_absorbing_element() {
+    // 0 / A = 0
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let zero = Tensor::fill(rows, cols, 0.0);
+    assert_eq!(zero, zero.div_elem(&t));
+}
+#[test]
+fn div_elem_a_on_a_is_one() {
+    // A / A = 1
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let one = Tensor::fill(rows, cols, 1.0);
+    assert_eq!(&one, &t.div_elem(&t));
+}
+#[test]
+fn div_elem_is_distributive_by_right() {
+    //(A+B)/C=A/C + B/C
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let a = Tensor::rand(rows, cols);
+    let b = Tensor::rand(rows, cols);
+    let c = Tensor::rand(rows, cols).map(|x| x + 2.0); //to avoid instability of dividing by near 0 values
+    let ab_c = (a.add(&b)).div_elem(&c);
+    let ac_bc = (a.div_elem(&c)).add(&b.div_elem(&c));
+    assert!(approx_eq(&ab_c, &ac_bc));
+}
+
+#[test]
+fn div_elem_is_inverse_function_of_mul_elem() {
+    // (A/B)*B=A
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let a = Tensor::rand(rows, cols);
+    let b = Tensor::rand(rows, cols).map(|x| x + 2.0);
+    let r=(a.div_elem(&b)).mul_elem(&b);
+    assert!(approx_eq(&a,&r));
+}
 
 //scale
 #[test]
