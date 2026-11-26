@@ -1,9 +1,10 @@
 use micrograd_rs::autograd::Var;
 use micrograd_rs::tensor::Tensor;
+use micrograd_rs::loss::mse_loss;
 
 fn main() {
     let n_step = 3000;
-    let lr = 0.5;
+    let lr = 2.0;
     //training set
     let xor_vec = vec![0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
     let target_vec = vec![0.0, 1.0, 1.0, 0.0];
@@ -19,8 +20,7 @@ fn main() {
     for i in 0..n_step {
         let hidden = ((xor.matmul(&w1)).add_row(&b1)).tanh();
         let output = ((hidden.matmul(&w2)).add_row(&b2)).sigmoid();
-        let diff = output.sub(&target);
-        let loss = (diff.mul_elem(&diff)).sum();
+        let loss = mse_loss(&output, &target);
         //reset grad
         w1.set_grad(0.0);
         b1.set_grad(0.0);
@@ -38,8 +38,7 @@ fn main() {
     }
     let hidden = ((xor.matmul(&w1)).add_row(&b1)).tanh();
     let output = ((hidden.matmul(&w2)).add_row(&b2)).sigmoid();
-    let diff = output.sub(&target);
-    let loss = (diff.mul_elem(&diff)).sum();
+    let loss = mse_loss(&output, &target);
     println!("loss:{}", loss.data().get(0, 0));
     for i in 0..4 {
         println!("{}", output.data().get(i, 0))
