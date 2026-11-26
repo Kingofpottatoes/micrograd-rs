@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 #[derive(Clone, Copy)]
-pub enum TOp {
+pub(crate) enum TOp {
     Leaf,
     Sum,
     Add,
@@ -20,7 +20,7 @@ pub enum TOp {
     Mean,
 }
 
-pub struct VarData {
+pub(crate) struct VarData {
     data: Tensor,
     grad: Tensor,
     children: Vec<Var>,
@@ -37,7 +37,7 @@ impl Var {
     pub fn grad(&self) -> Ref<'_, Tensor> {
         Ref::map(self.0.borrow(), |d| &d.grad)
     }
-    pub fn from_op(data: Tensor, children: Vec<Var>, op: TOp) -> Var {
+    pub(crate) fn from_op(data: Tensor, children: Vec<Var>, op: TOp) -> Var {
         let grad = Tensor::fill(data.rows(), data.cols(), 0.0);
         Var(Rc::new(RefCell::new(VarData {
             data,
