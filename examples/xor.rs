@@ -1,5 +1,5 @@
 use micrograd_rs::autograd::Var;
-use micrograd_rs::loss::mse_loss;
+use micrograd_rs::loss::bce_loss;
 use micrograd_rs::nn::{Linear, Module, Sequential, Sigmoid, Tanh};
 use micrograd_rs::optimizer::{Optimizer, Sgd};
 use micrograd_rs::tensor::Tensor;
@@ -23,7 +23,7 @@ fn main() {
     //training loop
     for i in 0..n_step {
         let output = model.forward(&xor);
-        let loss = mse_loss(&output, &target);
+        let loss = bce_loss(&output, &target);
         //reset grad
         sgd.zero_grad();
         //backward
@@ -34,7 +34,7 @@ fn main() {
         }
     }
     let output = model.forward(&xor);
-    let loss = mse_loss(&output, &target);
+    let loss = bce_loss(&output, &target);
     println!("loss:{}", loss.data().get(0, 0));
     for i in 0..4 {
         println!("{}", output.data().get(i, 0))
