@@ -7,7 +7,59 @@ use micrograd_rs::{
 };
 
 #[test]
-fn sequential_learns_xor() {
+fn sgd_zero_grad_check() {
+    let n_param = rand::random_range(1..10);
+    let mut params = Vec::new();
+    for _ in 0..n_param {
+        let rows = rand::random_range(1..10);
+        let cols = rand::random_range(1..10);
+        let var = Var::new(Tensor::rand(rows, cols));
+        var.set_grad(5.0);
+        params.push(var);
+    }
+    let params_list = params.clone();
+    let sgd = Sgd::new(params, 0.0);
+    sgd.zero_grad();
+    for i in 0..n_param {
+        assert_eq!(
+            *params_list[i].grad(),
+            Tensor::fill(
+                params_list[i].data().rows(),
+                params_list[i].data().cols(),
+                0.0
+            )
+        );
+    }
+}
+
+#[test]
+fn adam_zero_grad_check() {
+    let n_param = rand::random_range(1..10);
+    let mut params = Vec::new();
+    for _ in 0..n_param {
+        let rows = rand::random_range(1..10);
+        let cols = rand::random_range(1..10);
+        let var = Var::new(Tensor::rand(rows, cols));
+        var.set_grad(5.0);
+        params.push(var);
+    }
+    let params_list = params.clone();
+    let adam = Adam::new(params, 0.0);
+    adam.zero_grad();
+    for i in 0..n_param {
+        assert_eq!(
+            *params_list[i].grad(),
+            Tensor::fill(
+                params_list[i].data().rows(),
+                params_list[i].data().cols(),
+                0.0
+            )
+        );
+    }
+}
+
+#[test]
+fn sgd_learns_xor() {
     let n_step = 3000;
     let lr = 2.0;
     //training set
