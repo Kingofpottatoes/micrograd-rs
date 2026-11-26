@@ -125,7 +125,8 @@ fn sequential_learns_xor() {
         //backward
         loss.backward();
         for p in params.iter() {
-            p.update(lr);
+            let delta=p.grad().scale(lr);
+            p.apply_delta(&delta);
         }
         if i % 300 == 0 {
             println!("{i}: loss:{}", loss.data().get(0, 0));
