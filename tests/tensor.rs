@@ -1,20 +1,8 @@
-use micrograd_rs::tensor::Tensor;
+mod common;
 
-fn approx_eq(a: &Tensor, b: &Tensor) -> bool {
-    let tolerance = 1e-4;
-    if a.rows() != b.rows() {
-        return false;
-    }
-    if a.cols() != b.cols() {
-        return false;
-    }
-    let all_almost_equals = a
-        .data()
-        .iter()
-        .zip(b.data().iter())
-        .all(|(a, b)| (*a - *b).abs() <= tolerance);
-    return all_almost_equals;
-}
+use micrograd_rs::tensor::Tensor;
+use common::approx_eq;
+
 //-----------------
 //--CONSTRUCTORS---
 //-----------------
