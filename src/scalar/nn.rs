@@ -80,8 +80,6 @@ impl Layer {
 
 pub struct MLP {
     layers: Vec<Layer>,
-    hidden_act: Activation,
-    output_act: Activation,
 }
 
 impl MLP {
@@ -103,8 +101,6 @@ impl MLP {
         }
         MLP {
             layers,
-            hidden_act,
-            output_act,
         }
     }
 

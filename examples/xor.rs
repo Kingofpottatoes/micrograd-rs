@@ -1,6 +1,6 @@
 use micrograd_rs::autograd::Var;
-use micrograd_rs::tensor::Tensor;
 use micrograd_rs::loss::mse_loss;
+use micrograd_rs::tensor::Tensor;
 
 fn main() {
     let n_step = 3000;
