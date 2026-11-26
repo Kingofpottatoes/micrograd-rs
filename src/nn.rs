@@ -26,3 +26,31 @@ impl Module for Linear {
         vec![self.w.clone(),self.b.clone()]
     }
 }
+
+pub struct Tanh;
+impl Module for Tanh{
+    fn forward(&self,x:&Var)->Var{
+        x.tanh()
+    }
+    fn parameters(&self)->Vec<Var>{
+        vec![]
+    }
+}
+pub struct Sigmoid;
+impl Module for Sigmoid{
+    fn forward(&self,x:&Var)->Var{
+        x.sigmoid()
+    }
+    fn parameters(&self)->Vec<Var>{
+        vec![]
+    }
+}
+pub struct Relu;
+impl Module for Relu{
+    fn forward(&self,x:&Var)->Var{
+        x.relu()
+    }
+    fn parameters(&self)->Vec<Var>{
+        vec![]
+    }
+}
