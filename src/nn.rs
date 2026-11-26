@@ -54,3 +54,30 @@ impl Module for Relu{
         vec![]
     }
 }
+
+pub struct Sequential {
+    layers: Vec<Box<dyn Module>>,
+}
+
+impl Sequential{
+    pub fn new(layers: Vec<Box<dyn Module>>)->Sequential{
+        Sequential { layers }
+    }
+}
+
+impl Module for Sequential{
+    fn forward(&self,x:&Var)->Var{
+        let mut out=x.clone();
+        for layer in self.layers.iter(){
+            out=layer.forward(&out);
+        }
+        out
+    }
+    fn parameters(&self)->Vec<Var>{
+        let mut params=Vec::new();
+        for layer in self.layers.iter(){
+            params.extend(layer.parameters());
+        }
+        params
+    }
+}
