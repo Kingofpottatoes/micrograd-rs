@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 #[derive(Clone, Copy)]
-pub(crate) enum TOp {
+pub enum TOp {
     Leaf,
     Sum,
     Add,
@@ -20,7 +20,7 @@ pub(crate) enum TOp {
     Mean,
 }
 
-pub(crate) struct VarData {
+pub struct VarData {
     data: Tensor,
     grad: Tensor,
     children: Vec<Var>,
@@ -32,22 +32,22 @@ pub struct Var(Rc<RefCell<VarData>>);
 
 impl Var {
     pub fn data(&self) -> Ref<'_, Tensor> {
-        Ref::map(self.0.borrow(), |d| &d.data)
+        return Ref::map(self.0.borrow(), |d| &d.data);
     }
     pub fn grad(&self) -> Ref<'_, Tensor> {
-        Ref::map(self.0.borrow(), |d| &d.grad)
+        return Ref::map(self.0.borrow(), |d| &d.grad);
     }
-    pub(crate) fn from_op(data: Tensor, children: Vec<Var>, op: TOp) -> Var {
+    pub fn from_op(data: Tensor, children: Vec<Var>, op: TOp) -> Var {
         let grad = Tensor::fill(data.rows(), data.cols(), 0.0);
         Var(Rc::new(RefCell::new(VarData {
-            data,
-            grad,
-            children,
-            op,
+            data: data,
+            grad: grad,
+            children: children,
+            op: op,
         })))
     }
     pub fn new(data: Tensor) -> Var {
-        Var::from_op(data, vec![], TOp::Leaf)
+        return Var::from_op(data, vec![], TOp::Leaf);
     }
     pub fn matmul(&self, other: &Var) -> Var {
         return Var::from_op(
@@ -61,7 +61,7 @@ impl Var {
     }
     pub fn sum(&self) -> Var {
         let data = Tensor::fill(1, 1, self.data().sum());
-        Var::from_op(data, vec![self.clone()], TOp::Sum)
+        return Var::from_op(data, vec![self.clone()], TOp::Sum);
     }
     pub fn add(&self, other: &Var) -> Var {
         return Var::from_op(
@@ -93,11 +93,11 @@ impl Var {
     }
     pub fn add_row(&self, bias: &Var) -> Var {
         let data = self.data().add_row(&bias.data());
-        Var::from_op(data, vec![self.clone(), bias.clone()], TOp::AddRow)
+        return Var::from_op(data, vec![self.clone(), bias.clone()], TOp::AddRow);
     }
     pub fn mul_elem(&self, other: &Var) -> Var {
         let data = self.data().mul_elem(&other.data());
-        Var::from_op(data, vec![self.clone(), other.clone()], TOp::MulElem)
+        return Var::from_op(data, vec![self.clone(), other.clone()], TOp::MulElem);
     }
     pub fn relu(&self) -> Var {
         return Var::from_op(
@@ -178,7 +178,7 @@ impl Var {
             }
             TOp::ReLu => {
                 let contribution = data
-                    .map(|x| if x > 0.0 { 1.0 } else { 0.0 })
+                    .map(|x| if x > 0.0 { return 1.0 } else { return 0.0 })
                     .mul_elem(&grad);
                 children[0].accumulate_grad(&contribution);
             }
