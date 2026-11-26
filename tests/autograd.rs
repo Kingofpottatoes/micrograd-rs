@@ -4,7 +4,6 @@ use common::check_grad;
 use micrograd_rs::autograd::Var;
 use micrograd_rs::tensor::Tensor;
 
-
 #[test]
 fn tanh_grad() {
     let rows = rand::random_range(1..10);

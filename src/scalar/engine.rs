@@ -32,7 +32,7 @@ pub struct Value(Rc<RefCell<ValueData>>);
 impl Value {
     pub fn new(data: f64) -> Value {
         let v = ValueData {
-            data: data,
+            data,
             grad: 0.0,
             children: Vec::new(),
             op: Op::Leaf,
@@ -42,32 +42,32 @@ impl Value {
     pub fn tanh(&self) -> Value {
         let data = self.0.borrow().data.tanh();
         let children = vec![self.clone()];
-        return Value(Rc::new(RefCell::new(ValueData {
-            data: data,
+        Value(Rc::new(RefCell::new(ValueData {
+            data,
             grad: 0.0,
-            children: children,
+            children,
             op: Op::Tanh,
-        })));
+        })))
     }
     pub fn sigmoid(&self) -> Value {
         let data = 1.0 / ((-self.0.borrow().data).exp() + 1.0);
         let children = vec![self.clone()];
-        return Value(Rc::new(RefCell::new(ValueData {
-            data: data,
+        Value(Rc::new(RefCell::new(ValueData {
+            data,
             grad: 0.0,
-            children: children,
+            children,
             op: Op::Sigmoid,
-        })));
+        })))
     }
     pub fn log(&self) -> Value {
         let data = self.0.borrow().data.ln();
         let children = vec![self.clone()];
-        return Value(Rc::new(RefCell::new(ValueData {
-            data: data,
+        Value(Rc::new(RefCell::new(ValueData {
+            data,
             grad: 0.0,
-            children: children,
+            children,
             op: Op::Log,
-        })));
+        })))
     }
     fn local_backward(&self) {
         let data = self.0.borrow().data;
@@ -132,9 +132,9 @@ impl Add for Value {
         let data = self.0.borrow().data + other.0.borrow().data;
         let children = vec![self, other];
         Value(Rc::new(RefCell::new(ValueData {
-            data: data,
+            data,
             grad: 0.0,
-            children: children,
+            children,
             op: Op::Add,
         })))
     }
@@ -145,9 +145,9 @@ impl Sub for Value {
         let data = self.0.borrow().data - other.0.borrow().data;
         let children = vec![self, other];
         Value(Rc::new(RefCell::new(ValueData {
-            data: data,
+            data,
             grad: 0.0,
-            children: children,
+            children,
             op: Op::Sub,
         })))
     }
@@ -158,9 +158,9 @@ impl Mul for Value {
         let data = self.0.borrow().data * other.0.borrow().data;
         let children = vec![self, other];
         Value(Rc::new(RefCell::new(ValueData {
-            data: data,
+            data,
             grad: 0.0,
-            children: children,
+            children,
             op: Op::Mul,
         })))
     }

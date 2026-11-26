@@ -23,8 +23,8 @@ impl Neuron {
 
         let b = Value::new(rand::random_range(-1.0..1.0));
         Neuron {
-            w: w,
-            b: b,
+            w,
+            b,
             act: activation,
         }
     }
@@ -36,21 +36,15 @@ impl Neuron {
         }
         sum += self.b.clone();
         match self.act {
-            Activation::Linear => {
-                return sum;
-            }
-            Activation::Sigmoid => {
-                return sum.sigmoid();
-            }
-            Activation::Tanh => {
-                return sum.tanh();
-            }
+            Activation::Linear => sum,
+            Activation::Sigmoid => sum.sigmoid(),
+            Activation::Tanh => sum.tanh(),
         }
     }
     pub fn parameters(&self) -> Vec<Value> {
         let mut param = self.w.clone();
         param.push(self.b.clone());
-        return param;
+        param
     }
 }
 
@@ -71,7 +65,7 @@ impl Layer {
         for neuron in self.neurons.iter() {
             output.push(neuron.forward(x));
         }
-        return output;
+        output
     }
     pub fn parameters(&self) -> Vec<Value> {
         let mut output = Vec::new();
@@ -80,7 +74,7 @@ impl Layer {
                 output.push(value);
             }
         }
-        return output;
+        output
     }
 }
 
@@ -107,11 +101,11 @@ impl MLP {
             }
             prev = *size;
         }
-        return MLP {
+        MLP {
             layers,
             hidden_act,
             output_act,
-        };
+        }
     }
 
     pub fn forward(&self, x: &[Value]) -> Vec<Value> {
@@ -119,13 +113,13 @@ impl MLP {
         for layer in self.layers.iter() {
             out = layer.forward(&out);
         }
-        return out;
+        out
     }
     pub fn parameters(&self) -> Vec<Value> {
         let mut params = Vec::new();
         for layer in self.layers.iter() {
             params.extend(layer.parameters());
         }
-        return params;
+        params
     }
 }

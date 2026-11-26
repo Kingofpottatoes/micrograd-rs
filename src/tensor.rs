@@ -1,6 +1,4 @@
 use rand::RngExt;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tensor {
@@ -13,15 +11,15 @@ impl Tensor {
     pub fn fill(rows: usize, cols: usize, value: f32) -> Tensor {
         Tensor {
             data: vec![value; rows * cols],
-            rows: rows,
+            rows,
             columns: cols,
         }
     }
     pub fn from_vec(data: Vec<f32>, rows: usize, cols: usize) -> Tensor {
         assert_eq!(data.len(), rows * cols);
         Tensor {
-            data: data,
-            rows: rows,
+            data,
+            rows,
             columns: cols,
         }
     }
@@ -36,7 +34,7 @@ impl Tensor {
                 }
             }
         }
-        return Tensor::from_vec(identity_vec, size, size);
+        Tensor::from_vec(identity_vec, size, size)
     }
     pub fn rand(rows: usize, cols: usize) -> Tensor {
         let mut data = Vec::new();
@@ -45,15 +43,15 @@ impl Tensor {
             data.push(rng.random_range(-1.0..1.0));
         }
         Tensor {
-            data: data,
-            rows: rows,
+            data,
+            rows,
             columns: cols,
         }
     }
     pub fn get(&self, i: usize, j: usize) -> f32 {
         assert!(i < self.rows, "row index out of bounds");
         assert!(j < self.columns, "column index out of bounds");
-        return self.data[i * self.columns + j];
+        self.data[i * self.columns + j]
     }
     pub fn set(&mut self, i: usize, j: usize, value: f32) {
         assert!(i < self.rows, "row index out of bounds");
@@ -61,13 +59,13 @@ impl Tensor {
         self.data[i * self.columns + j] = value
     }
     pub fn data(&self) -> &[f32] {
-        return &self.data;
+        &self.data
     }
     pub fn rows(&self) -> usize {
-        return self.rows;
+        self.rows
     }
     pub fn cols(&self) -> usize {
-        return self.columns;
+        self.columns
     }
     pub fn matmul(&self, other: &Tensor) -> Tensor {
         assert_eq!(self.columns, other.rows);
@@ -82,7 +80,7 @@ impl Tensor {
             }
         }
         Tensor {
-            data: data,
+            data,
             rows: self.rows,
             columns: other.columns,
         }
@@ -94,7 +92,7 @@ impl Tensor {
                 trans.set(j, i, self.get(i, j));
             }
         }
-        return trans;
+        trans
     }
     pub fn add_row(&self, row: &Tensor) -> Tensor {
         assert_eq!(row.rows, 1);
@@ -106,7 +104,7 @@ impl Tensor {
             }
         }
         Tensor {
-            data: data,
+            data,
             rows: self.rows,
             columns: self.columns,
         }
@@ -119,7 +117,7 @@ impl Tensor {
             }
         }
         Tensor {
-            data: data,
+            data,
             rows: 1,
             columns: self.columns,
         }
@@ -130,7 +128,7 @@ impl Tensor {
             data.push(f(*value));
         }
         Tensor {
-            data: data,
+            data,
             rows: self.rows,
             columns: self.columns,
         }
@@ -145,7 +143,7 @@ impl Tensor {
             }
         }
         Tensor {
-            data: data,
+            data,
             rows: self.rows,
             columns: self.columns,
         }
@@ -155,7 +153,7 @@ impl Tensor {
         for value in self.data.iter() {
             sum += value;
         }
-        return sum;
+        sum
     }
     pub fn mul_elem(&self, other: &Tensor) -> Tensor {
         assert_eq!(self.rows, other.rows);
@@ -167,7 +165,7 @@ impl Tensor {
             }
         }
         Tensor {
-            data: data,
+            data,
             rows: self.rows,
             columns: self.columns,
         }
@@ -180,7 +178,7 @@ impl Tensor {
             }
         }
         Tensor {
-            data: data,
+            data,
             rows: self.rows,
             columns: self.columns,
         }

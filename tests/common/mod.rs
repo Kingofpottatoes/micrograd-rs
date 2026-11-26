@@ -11,14 +11,12 @@ pub fn approx_eq(a: &Tensor, b: &Tensor) -> bool {
     if a.cols() != b.cols() {
         return false;
     }
-    let all_almost_equals = a
-        .data()
+
+    a.data()
         .iter()
         .zip(b.data().iter())
-        .all(|(a, b)| (*a - *b).abs() <= tolerance);
-    all_almost_equals
+        .all(|(a, b)| (*a - *b).abs() <= tolerance)
 }
-
 
 pub fn get_biggest_difference(a: Tensor, b: Tensor) -> f32 {
     assert_eq!(a.rows(), b.rows());

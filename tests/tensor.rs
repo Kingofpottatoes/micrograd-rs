@@ -1,7 +1,7 @@
 mod common;
 
-use micrograd_rs::tensor::Tensor;
 use common::approx_eq;
+use micrograd_rs::tensor::Tensor;
 
 //-----------------
 //--CONSTRUCTORS---
