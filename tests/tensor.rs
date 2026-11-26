@@ -627,8 +627,8 @@ fn div_elem_is_inverse_function_of_mul_elem() {
     let cols = rand::random_range(1..10);
     let a = Tensor::rand(rows, cols);
     let b = Tensor::rand(rows, cols).map(|x| x + 2.0);
-    let r=(a.div_elem(&b)).mul_elem(&b);
-    assert!(approx_eq(&a,&r));
+    let r = (a.div_elem(&b)).mul_elem(&b);
+    assert!(approx_eq(&a, &r));
 }
 
 //scale

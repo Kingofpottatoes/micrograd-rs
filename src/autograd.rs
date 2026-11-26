@@ -212,7 +212,7 @@ impl Var {
         let mut g = self.0.borrow_mut();
         g.grad = Tensor::fill(g.data.rows(), g.data.cols(), value);
     }
-    pub fn apply_delta(&self, delta:&Tensor) {
+    pub fn apply_delta(&self, delta: &Tensor) {
         let mut d = self.0.borrow_mut();
         d.data = d.data.add(&delta.scale(-1.0));
     }
