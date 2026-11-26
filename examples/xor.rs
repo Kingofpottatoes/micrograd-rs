@@ -1,6 +1,7 @@
 use micrograd_rs::autograd::Var;
 use micrograd_rs::loss::mse_loss;
 use micrograd_rs::nn::{Linear, Module, Sequential, Sigmoid, Tanh};
+use micrograd_rs::optimizer::{Optimizer, Sgd};
 use micrograd_rs::tensor::Tensor;
 
 fn main() {
@@ -18,20 +19,16 @@ fn main() {
         Box::new(Linear::new(4, 1)),
         Box::new(Sigmoid),
     ]);
-    let params = model.parameters();
+    let mut sgd = Sgd::new(model.parameters(), lr);
     //training loop
     for i in 0..n_step {
         let output = model.forward(&xor);
         let loss = mse_loss(&output, &target);
         //reset grad
-        for p in params.iter() {
-            p.set_grad(0.0);
-        }
+        sgd.zero_grad();
         //backward
         loss.backward();
-        for p in params.iter() {
-            p.update(lr);
-        }
+        sgd.step();
         if i % 300 == 0 {
             println!("{i}: loss:{}", loss.data().get(0, 0));
         }
