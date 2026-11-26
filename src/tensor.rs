@@ -170,6 +170,21 @@ impl Tensor {
             columns: self.columns,
         }
     }
+    pub fn div_elem(&self, other: &Tensor) -> Tensor {
+        assert_eq!(self.rows, other.rows);
+        assert_eq!(self.columns, other.columns);
+        let mut data = Vec::new();
+        for i in 0..self.rows {
+            for j in 0..self.columns {
+                data.push(self.data[i * self.columns + j] / other.data[i * other.columns + j]);
+            }
+        }
+        Tensor {
+            data,
+            rows: self.rows,
+            columns: self.columns,
+        }
+    }
     pub fn scale(&self, v: f32) -> Tensor {
         let mut data = Vec::new();
         for i in 0..self.rows {
