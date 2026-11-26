@@ -884,3 +884,22 @@ fn softmax_rows_is_stable_with_extreme_values() {
     let expected = Tensor::from_vec(vec![0.731_059, 0.268_941], 1, 2);
     assert!(approx_eq(&t.softmax_rows(), &expected));
 }
+
+#[test]
+fn log_softmax_rows_exp_is_softmax() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let r = t.log_softmax_rows().map(|x| x.exp());
+    assert!(approx_eq(&r, &t.softmax_rows()));
+}
+
+#[test]
+fn log_softmax_rows_is_finite_with_extreme_values() {
+    // log(softmax) would give log(0) = -inf for the second value
+    let t = Tensor::from_vec(vec![0.0, -200.0], 1, 2);
+    let r = t.log_softmax_rows();
+    assert!(r.data().iter().all(|x| x.is_finite()));
+    let expected = Tensor::from_vec(vec![0.0, -200.0], 1, 2);
+    assert!(approx_eq(&r, &expected));
+}

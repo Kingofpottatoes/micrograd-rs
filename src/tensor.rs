@@ -219,4 +219,25 @@ impl Tensor {
 
         out
     }
+    pub fn log_softmax_rows(&self) -> Tensor {
+        let mut out = self.clone();
+        for i in 0..out.rows {
+            let mut max = f32::NEG_INFINITY;
+            for j in 0..out.columns {
+                if out.get(i, j) > max {
+                    max = out.get(i, j);
+                }
+            }
+            let mut sum = 0.0;
+            for j in 0..out.columns {
+                out.data[i * out.columns + j] = out.data[i * out.columns + j] - max;
+                sum += out.data[i * out.columns + j].exp();
+            }
+            for j in 0..out.columns {
+                out.data[i * out.columns + j] = out.data[i * out.columns + j] - sum.ln();
+            }
+        }
+
+        out
+    }
 }
