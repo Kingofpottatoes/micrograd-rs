@@ -1,7 +1,7 @@
 mod common;
-use common::check_grad;
+use common::{check_grad, random_one_hot};
 use micrograd_rs::autograd::Var;
-use micrograd_rs::loss::{bce_loss, mse_loss};
+use micrograd_rs::loss::{bce_loss, cross_entropy_loss, mse_loss};
 use micrograd_rs::tensor::Tensor;
 
 #[test]
@@ -91,6 +91,45 @@ fn bce_loss_grad() {
     let t = Tensor::rand(rows, cols);
     let target = Var::new(Tensor::rand(rows, cols));
     let error = check_grad(|p| bce_loss(&p.sigmoid(), &target), &t);
+    assert!(
+        error < 1e-2,
+        "max error: {} (rows={}, cols={})",
+        error,
+        rows,
+        cols
+    );
+}
+
+#[test]
+fn cross_entropy_size_check() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let pred = Var::new(Tensor::rand(rows, cols));
+    let target = Var::new(random_one_hot(rows, cols));
+    let loss = cross_entropy_loss(&pred, &target);
+    assert_eq!(loss.data().rows(), 1);
+    assert_eq!(loss.data().cols(), 1);
+}
+#[test]
+fn cross_entropy_units_test() {
+    let rows = rand::random_range(1..10);
+    let pred = Var::new(Tensor::fill(rows, 3, 0.0));
+    let target = Var::new(random_one_hot(rows, 3));
+    let loss = cross_entropy_loss(&pred, &target);
+    assert!(
+        (loss.data().get(0, 0) - 1e-5).abs() < 3.0_f32.ln(),
+        "loss: {}",
+        loss.data().get(0, 0)
+    );
+}
+
+#[test]
+fn cross_entropy_loss_grad() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let target = Var::new(random_one_hot(rows, cols));
+    let error = check_grad(|p| cross_entropy_loss(p, &target), &t);
     assert!(
         error < 1e-2,
         "max error: {} (rows={}, cols={})",

@@ -18,6 +18,7 @@ pub enum TOp {
     Sigmoid,
     ReLu,
     Mean,
+    CrossEntropy,
 }
 
 pub struct VarData {
@@ -120,6 +121,19 @@ impl Var {
             TOp::Mean,
         );
     }
+    pub fn cross_entropy(&self, target: &Var) -> Var {
+        let n = self.data().rows() as f32;
+        let sum = target
+            .data()
+            .mul_elem(&self.data().log_softmax_rows())
+            .sum();
+        let loss = -sum / n;
+        Var::from_op(
+            Tensor::fill(1, 1, loss),
+            vec![self.clone(), target.clone()],
+            TOp::CrossEntropy,
+        )
+    }
     fn accumulate_grad(&self, g: &Tensor) {
         let mut d = self.0.borrow_mut();
         d.grad = d.grad.add(g);
@@ -193,6 +207,13 @@ impl Var {
                     children[0].data().cols(),
                     grad.scale(1.0 / n).get(0, 0),
                 );
+                children[0].accumulate_grad(&contribution);
+            }
+            TOp::CrossEntropy => {
+                let g = grad.get(0, 0);
+                let n = children[0].data().rows() as f32;
+                let probs = children[0].data().softmax_rows();
+                let contribution = (probs.add(&children[1].data().scale(-1.0))).scale(g / n);
                 children[0].accumulate_grad(&contribution);
             }
         }

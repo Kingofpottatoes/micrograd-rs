@@ -25,3 +25,7 @@ pub fn bce_loss(pred: &Var, target: &Var) -> Var {
     let loss = (term1.add(&term2)).mean().scale(-1.0);
     loss
 }
+
+pub fn cross_entropy_loss(logits: &Var, target: &Var) -> Var {
+    logits.cross_entropy(target)
+}

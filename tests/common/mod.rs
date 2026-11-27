@@ -54,3 +54,11 @@ pub fn check_grad(f: impl Fn(&Var) -> Var, x: &Tensor) -> f32 {
     }
     get_biggest_difference(analytic, calculed_grad)
 }
+
+pub fn random_one_hot(rows: usize, cols: usize) -> Tensor {
+    let mut t = Tensor::fill(rows, cols, 0.0);
+    for i in 0..rows {
+        t.set(i, rand::random_range(0..cols), 1.0);
+    }
+    t
+}
