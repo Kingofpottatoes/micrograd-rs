@@ -12,8 +12,9 @@ pub struct Linear {
 
 impl Linear {
     pub fn new(n_inputs: usize, n_outputs: usize) -> Linear {
-        let w = Var::new(Tensor::rand(n_inputs, n_outputs));
-        let b = Var::new(Tensor::rand(1, n_outputs));
+        let limit=(6.0/n_inputs as f32).sqrt();
+        let w = Var::new(Tensor::rand(n_inputs, n_outputs).scale(limit));
+        let b = Var::new(Tensor::fill(1, n_outputs,0.0));
         Linear { w, b }
     }
 }
