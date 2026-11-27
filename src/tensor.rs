@@ -253,4 +253,13 @@ impl Tensor {
         }
         maximums
     }
+    pub fn select_rows(&self, indices: &[usize]) -> Tensor {
+        let rows = indices.len();
+        let mut data = Vec::new();
+        for &i in indices.iter() {
+            assert!(i < self.rows, "Index out of range");
+            data.extend_from_slice(&self.data[(i * self.columns)..((i + 1) * self.columns)]);
+        }
+        Tensor::from_vec(data, rows, self.columns)
+    }
 }

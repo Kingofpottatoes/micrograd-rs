@@ -903,3 +903,30 @@ fn log_softmax_rows_is_finite_with_extreme_values() {
     let expected = Tensor::from_vec(vec![0.0, -200.0], 1, 2);
     assert!(approx_eq(&r, &expected));
 }
+
+#[test]
+fn select_rows_size_check() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let k = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let indices: Vec<usize> = (0..k).map(|_| rand::random_range(0..rows)).collect();
+    let r = t.select_rows(&indices);
+    assert_eq!(r.rows(), k);
+    assert_eq!(r.cols(), cols)
+}
+
+#[test]
+fn select_rows_value_check() {
+    let rows = rand::random_range(1..10);
+    let cols = rand::random_range(1..10);
+    let k = rand::random_range(1..10);
+    let t = Tensor::rand(rows, cols);
+    let indices: Vec<usize> = (0..k).map(|_| rand::random_range(0..rows)).collect();
+    let r = t.select_rows(&indices);
+    for i in 0..k {
+        for j in 0..cols {
+            assert_eq!(r.get(i, j), t.get(indices[i], j));
+        }
+    }
+}
