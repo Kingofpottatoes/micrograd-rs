@@ -13,3 +13,7 @@ viz = ["dep:plotters"]
 [[example]]
 name = "mnist"
 required-features = ["viz"]
+
+[[example]]
+name = "three_class"
+required-features = ["viz"]

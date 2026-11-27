@@ -3,6 +3,7 @@ use micrograd_rs::loss::cross_entropy_loss;
 use micrograd_rs::nn::{Linear, Module, Sequential, Tanh};
 use micrograd_rs::optimizer::{Adam, Optimizer};
 use micrograd_rs::tensor::Tensor;
+use micrograd_rs::visualizer::plot_decision_boundary;
 
 fn main() {
     let n_step = 3000;
@@ -58,5 +59,12 @@ fn main() {
         .filter(|(a, b)| a == b)
         .count();
     let accuracy = corrects as f32 / (3 * n_data_per_class) as f32;
+    plot_decision_boundary(
+        &model,
+        &input.data(),
+        &truth,
+        "plot_results/boundary_decision_three_class.png",
+    )
+    .unwrap();
     println!("accuracy: {accuracy}")
 }
