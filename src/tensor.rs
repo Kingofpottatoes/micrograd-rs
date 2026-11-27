@@ -240,4 +240,17 @@ impl Tensor {
 
         out
     }
+    pub fn argmax_rows(&self) -> Vec<usize> {
+        let mut maximums = Vec::new();
+        for i in 0..self.rows {
+            let mut j_max = 0;
+            for j in 0..self.columns {
+                if self.get(i, j) > self.get(i, j_max) {
+                    j_max = j;
+                }
+            }
+            maximums.push(j_max);
+        }
+        maximums
+    }
 }
