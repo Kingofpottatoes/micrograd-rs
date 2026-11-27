@@ -109,9 +109,9 @@ fn adam_learns_xor() {
     let target = Var::new(Tensor::from_vec(target_vec, 4, 1));
     //2 layers
     let model = Sequential::new(vec![
-        Box::new(Linear::new(2, 4)),
+        Box::new(Linear::new(2, 8)),
         Box::new(Tanh),
-        Box::new(Linear::new(4, 1)),
+        Box::new(Linear::new(8, 1)),
         Box::new(Sigmoid),
     ]);
     let mut adam = Adam::new(model.parameters(), lr);
