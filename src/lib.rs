@@ -6,4 +6,4 @@ pub mod optimizer;
 pub mod scalar;
 pub mod tensor;
 #[cfg(feature = "viz")]
-pub mod vizualizer;
+pub mod visualizer;

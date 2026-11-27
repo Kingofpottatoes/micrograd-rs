@@ -46,6 +46,6 @@ fn main(){
         .count();
     let accuracy = corrects as f32 / (truth.len()) as f32;
     println!("accuracy: {accuracy}");
-    plot_loss(&losses,"losses_mnst.png").unwrap();
+    plot_loss(&losses,"plot_results/losses_mnst.png").unwrap();
 
 }
