@@ -1,5 +1,6 @@
 use micrograd_rs::{data::{DataLoader, mnist::{load_images, load_labels}}, loss::cross_entropy_loss, nn::{Linear, Module, Relu, Sequential}, optimizer::{Adam, Optimizer}};
 use micrograd_rs::autograd::Var;
+use micrograd_rs::vizualizer::plot_loss;
 
 
 
@@ -11,6 +12,7 @@ fn main(){
     let test_labels = load_labels("data/mnist/t10k-labels-idx1-ubyte");
     let dataloader=DataLoader::new(train_images, train_labels, 10, 64);
     let n_epochs: i32=3; //how many time model see all the data
+    let mut losses=Vec::new();
     let model = Sequential::new(vec![
         Box::new(Linear::new(784,128)),
         Box::new(Relu),
@@ -24,6 +26,7 @@ fn main(){
             let (x, y) = dataloader.batch(chunk);
             let output=model.forward(&Var::new(x));
             let loss=cross_entropy_loss(&output, &Var::new(y));
+            losses.push(loss.data().get(0,0));
             adam.zero_grad();
             loss.backward();
             adam.step();
@@ -42,6 +45,7 @@ fn main(){
         .filter(|(a, b)| a == b)
         .count();
     let accuracy = corrects as f32 / (truth.len()) as f32;
-    println!("accuracy: {accuracy}")
+    println!("accuracy: {accuracy}");
+    plot_loss(&losses,"losses_mnst.png").unwrap();
 
 }
