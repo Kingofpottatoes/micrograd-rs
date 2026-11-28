@@ -57,5 +57,5 @@ fn main() {
         &model.parameters()[0].data(),
         128,
         "plot_results/weights.png",
-    );
+    ).unwrap();
 }
