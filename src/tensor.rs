@@ -213,7 +213,7 @@ impl Tensor {
                 sum += out.data[i * out.columns + j];
             }
             for j in 0..out.columns {
-                out.data[i * out.columns + j] = out.data[i * out.columns + j] / sum;
+                out.data[i * out.columns + j] /= sum;
             }
         }
 
@@ -230,11 +230,11 @@ impl Tensor {
             }
             let mut sum = 0.0;
             for j in 0..out.columns {
-                out.data[i * out.columns + j] = out.data[i * out.columns + j] - max;
+                out.data[i * out.columns + j] -= max;
                 sum += out.data[i * out.columns + j].exp();
             }
             for j in 0..out.columns {
-                out.data[i * out.columns + j] = out.data[i * out.columns + j] - sum.ln();
+                out.data[i * out.columns + j] -= sum.ln();
             }
         }
 

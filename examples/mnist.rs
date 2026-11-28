@@ -1,5 +1,5 @@
 use micrograd_rs::autograd::Var;
-use micrograd_rs::visualizer::plot_loss;
+use micrograd_rs::visualizer::{plot_loss, plot_weights};
 use micrograd_rs::{
     data::{
         DataLoader,
@@ -53,4 +53,9 @@ fn main() {
     let accuracy = corrects as f32 / (truth.len()) as f32;
     println!("accuracy: {accuracy}");
     plot_loss(&losses, "plot_results/losses_mnst.png").unwrap();
+    plot_weights(
+        &model.parameters()[0].data(),
+        128,
+        "plot_results/weights.png",
+    );
 }

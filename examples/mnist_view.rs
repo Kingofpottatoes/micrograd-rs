@@ -14,7 +14,7 @@ fn main() {
                 print!(" ");
             }
         }
-        println!("");
+        println!();
     }
     println!("label:{}", labels[0]);
 }

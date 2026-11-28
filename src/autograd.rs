@@ -33,22 +33,22 @@ pub struct Var(Rc<RefCell<VarData>>);
 
 impl Var {
     pub fn data(&self) -> Ref<'_, Tensor> {
-        return Ref::map(self.0.borrow(), |d| &d.data);
+        Ref::map(self.0.borrow(), |d| &d.data)
     }
     pub fn grad(&self) -> Ref<'_, Tensor> {
-        return Ref::map(self.0.borrow(), |d| &d.grad);
+        Ref::map(self.0.borrow(), |d| &d.grad)
     }
     pub fn from_op(data: Tensor, children: Vec<Var>, op: TOp) -> Var {
         let grad = Tensor::fill(data.rows(), data.cols(), 0.0);
         Var(Rc::new(RefCell::new(VarData {
-            data: data,
-            grad: grad,
-            children: children,
-            op: op,
+            data,
+            grad,
+            children,
+            op,
         })))
     }
     pub fn new(data: Tensor) -> Var {
-        return Var::from_op(data, vec![], TOp::Leaf);
+        Var::from_op(data, vec![], TOp::Leaf)
     }
     pub fn matmul(&self, other: &Var) -> Var {
         return Var::from_op(
@@ -62,7 +62,7 @@ impl Var {
     }
     pub fn sum(&self) -> Var {
         let data = Tensor::fill(1, 1, self.data().sum());
-        return Var::from_op(data, vec![self.clone()], TOp::Sum);
+        Var::from_op(data, vec![self.clone()], TOp::Sum)
     }
     pub fn add(&self, other: &Var) -> Var {
         return Var::from_op(
@@ -94,11 +94,11 @@ impl Var {
     }
     pub fn add_row(&self, bias: &Var) -> Var {
         let data = self.data().add_row(&bias.data());
-        return Var::from_op(data, vec![self.clone(), bias.clone()], TOp::AddRow);
+        Var::from_op(data, vec![self.clone(), bias.clone()], TOp::AddRow)
     }
     pub fn mul_elem(&self, other: &Var) -> Var {
         let data = self.data().mul_elem(&other.data());
-        return Var::from_op(data, vec![self.clone(), other.clone()], TOp::MulElem);
+        Var::from_op(data, vec![self.clone(), other.clone()], TOp::MulElem)
     }
     pub fn relu(&self) -> Var {
         return Var::from_op(
@@ -192,7 +192,7 @@ impl Var {
             }
             TOp::ReLu => {
                 let contribution = data
-                    .map(|x| if x > 0.0 { return 1.0 } else { return 0.0 })
+                    .map(|x| if x > 0.0 { 1.0 } else { 0.0 })
                     .mul_elem(&grad);
                 children[0].accumulate_grad(&contribution);
             }

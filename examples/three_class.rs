@@ -15,8 +15,8 @@ fn main() {
     let mut target_vec = Vec::new();
     for (c, &(cx, cy)) in centers.iter().enumerate() {
         for _ in 0..n_data_per_class {
-            input_data_vec.push(cx + rand::random_range(-0.4..0.4));
-            input_data_vec.push(cy + rand::random_range(-0.4..0.4));
+            input_data_vec.push(cx + rand::random_range(-0.6..0.6));
+            input_data_vec.push(cy + rand::random_range(-0.6..0.6));
             for k in 0..3 {
                 if c == k {
                     target_vec.push(1.0)

@@ -152,3 +152,46 @@ pub fn plot_decision_boundary(
 
     Ok(())
 }
+
+pub fn plot_weights(
+    w: &Tensor,
+    n_neurons: usize,
+    path: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let grid_rows = (n_neurons as f32).sqrt().ceil() as usize;
+    let side = (w.rows() as f32).sqrt().ceil() as usize;
+    let root = BitMapBackend::new(path, (800, 800)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let areas = root.split_evenly((grid_rows, grid_rows));
+
+    for (j, area) in areas.iter().enumerate().take(n_neurons) {
+        let (width, _) = area.dim_in_pixel();
+        let pixel_size = width as i32 / side as i32;
+        let max_abs = (0..w.rows()).map(|p| w.get(p, j).abs()).fold(0.0, f32::max);
+        for r in 0..side {
+            for c in 0..side {
+                let mut color = RGBColor(255, 255, 255);
+                let value = w.get(r * side + c, j) / max_abs;
+                if value >= 0.0 {
+                    let x = (255.0 * (1.0 - value)) as u8;
+                    color = RGBColor(255, x, x);
+                } else if value < 0.0 {
+                    let x = (255.0 * (1.0 + value)) as u8;
+                    color = RGBColor(x, x, 255);
+                }
+
+                area.draw(&Rectangle::new(
+                    [
+                        (c as i32 * pixel_size, r as i32 * pixel_size),
+                        ((c as i32 + 1) * pixel_size, (r as i32 + 1) * pixel_size),
+                    ],
+                    color.filled(),
+                ))?
+            }
+        }
+    }
+
+    root.present()?;
+    Ok(())
+}
